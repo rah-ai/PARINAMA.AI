@@ -7,6 +7,7 @@
 import os
 import sys
 import time
+import asyncio
 
 from contextlib import asynccontextmanager
 
@@ -17,7 +18,8 @@ load_dotenv()
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -78,9 +80,31 @@ async def lifespan(app: FastAPI):
     print("═" * 56)
     print()
 
+    # ── KEEP-ALIVE self-ping (prevents Render free tier sleep) ──
+    _keep_alive_task = None
+    _render_url = os.getenv("RENDER_EXTERNAL_URL")
+    if _render_url:
+        async def _self_ping():
+            """Ping own health endpoint every 10 minutes to stay awake."""
+            import httpx
+            url = f"{_render_url}/api/health"
+            while True:
+                await asyncio.sleep(600)  # 10 minutes
+                try:
+                    async with httpx.AsyncClient() as client:
+                        await client.get(url, timeout=10)
+                    print("[KEEP-ALIVE] Self-ping OK")
+                except Exception:
+                    pass
+
+        _keep_alive_task = asyncio.create_task(_self_ping())
+        print("[STARTUP] Keep-alive self-pinger started (every 10 min) ✓")
+
     yield
 
     # ── SHUTDOWN ──────────────────────────────
+    if _keep_alive_task:
+        _keep_alive_task.cancel()
     print()
     print("[SHUTDOWN] Parinama shutting down...")
     print("[SHUTDOWN] Goodbye. परिणाम 🙏")
@@ -184,22 +208,37 @@ app.include_router(ws_router)
 
 
 # ══════════════════════════════════════════════
-# ROOT ENDPOINT
+# SERVE FRONTEND (React SPA)
 # ══════════════════════════════════════════════
 
-@app.get("/")
-async def root():
-    """Root endpoint — app info."""
-    return {
-        "app": "PARINAMA",
-        "tagline": "परिणाम — Transformation through iteration",
-        "description": "A Self-Evolving Prompt Optimization Engine",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "api": "/api",
-        "websocket": "/ws/evolve",
-        "health": "/api/health",
-    }
+_STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+
+if os.path.isdir(_STATIC_DIR):
+    # Serve static assets (JS, CSS, images)
+    app.mount("/assets", StaticFiles(directory=os.path.join(_STATIC_DIR, "assets")), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        """Serve React SPA — fallback to index.html for client-side routing."""
+        file_path = os.path.join(_STATIC_DIR, full_path)
+        if full_path and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        return FileResponse(os.path.join(_STATIC_DIR, "index.html"))
+else:
+    # No frontend build found — show API info at root
+    @app.get("/")
+    async def root():
+        """Root endpoint — app info."""
+        return {
+            "app": "PARINAMA",
+            "tagline": "परिणाम — Transformation through iteration",
+            "description": "A Self-Evolving Prompt Optimization Engine",
+            "version": "1.0.0",
+            "docs": "/docs",
+            "api": "/api",
+            "websocket": "/ws/evolve",
+            "health": "/api/health",
+        }
 
 
 # ══════════════════════════════════════════════

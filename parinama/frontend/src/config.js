@@ -12,7 +12,12 @@ const isDev = import.meta.env.DEV;
 
 /* Backend URL — set via env var or auto-detect */
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
-  || (isDev ? '' : 'https://parinama-ai-backend.onrender.com');
+  || (isDev ? '' : '');
+
+/* 
+  In production: frontend is served from the same FastAPI server,
+  so we use same-origin (empty string) for all API/WS calls.
+*/
 
 /* API base (HTTP) */
 export const API_BASE = `${BACKEND_URL}/api`;
