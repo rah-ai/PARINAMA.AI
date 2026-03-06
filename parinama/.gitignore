@@ -1,0 +1,65 @@
+# ════════════════════════════════════════════════
+# PARINAMA — .gitignore
+# ════════════════════════════════════════════════
+
+# ── Python ───────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# ── Virtual Environment ─────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ── Environment Variables ────────────────────
+.env
+!.env.example
+
+# ── Database ─────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── Node / Frontend ─────────────────────────
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.local
+
+# ── IDE / Editor ─────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs ─────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── OS ───────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# ── Misc ─────────────────────────────────────
+*.bak
+*.tmp
+*.temp
+.cache/

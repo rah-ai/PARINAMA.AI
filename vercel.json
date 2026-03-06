@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://parinama-backend.onrender.com/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "buildCommand": "cd parinama/frontend && npm install && npm run build",
+  "outputDirectory": "parinama/frontend/dist",
+  "framework": "vite"
+}

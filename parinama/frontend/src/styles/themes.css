@@ -1,0 +1,230 @@
+/* ════════════════════════════════════════════════
+   PARINAMA — Theme Variables & Transitions
+   Warm, earthy, organic palette — no blue/purple
+   ════════════════════════════════════════════════ */
+
+/* ── Dark Theme (Default) ────────────────────── */
+
+:root,
+[data-theme="dark"] {
+  --bg-primary: #0D0C0A;
+  --bg-surface: #161410;
+  --bg-card: #1E1B17;
+  --bg-elevated: #252119;
+  --text-primary: #EAE2D6;
+  --text-secondary: #A8957E;
+  --text-muted: #6B5A47;
+  --accent-amber: #D4922A;
+  --accent-green: #5C8B4A;
+  --accent-rose: #B85450;
+  --border: #2C2720;
+  --shadow: rgba(0, 0, 0, 0.7);
+
+  /* Score Heat Colors */
+  --score-low: #B85450;
+  --score-mid: #D4922A;
+  --score-high: #5C8B4A;
+
+  /* Overlay */
+  --overlay: rgba(13, 12, 10, 0.85);
+
+  /* Input */
+  --input-bg: #1A1814;
+  --input-border: #2C2720;
+  --input-focus: #D4922A;
+  --input-placeholder: #6B5A47;
+
+  /* Scrollbar */
+  --scrollbar-track: #161410;
+  --scrollbar-thumb: #2C2720;
+  --scrollbar-thumb-hover: #3D3528;
+
+  /* Code / Prompt Display */
+  --code-bg: #131210;
+  --code-border: #2C2720;
+
+  /* Badge */
+  --badge-bg: rgba(212, 146, 42, 0.15);
+  --badge-text: #D4922A;
+  --badge-border: rgba(212, 146, 42, 0.3);
+
+  /* Tooltip */
+  --tooltip-bg: #252119;
+  --tooltip-text: #EAE2D6;
+  --tooltip-border: #2C2720;
+
+  /* Paper Texture */
+  --paper-texture: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* ── Light Theme ─────────────────────────────── */
+
+[data-theme="light"] {
+  --bg-primary: #F7F2EA;
+  --bg-surface: #EEE7D9;
+  --bg-card: #E6DECE;
+  --bg-elevated: #DDD5C3;
+  --text-primary: #1A1510;
+  --text-secondary: #5C4A32;
+  --text-muted: #9C8468;
+  --accent-amber: #B8760E;
+  --accent-green: #3D6B2C;
+  --accent-rose: #943530;
+  --border: #CEC5B0;
+  --shadow: rgba(0, 0, 0, 0.1);
+
+  /* Score Heat Colors */
+  --score-low: #943530;
+  --score-mid: #B8760E;
+  --score-high: #3D6B2C;
+
+  /* Overlay */
+  --overlay: rgba(247, 242, 234, 0.85);
+
+  /* Input */
+  --input-bg: #F0EAE0;
+  --input-border: #CEC5B0;
+  --input-focus: #B8760E;
+  --input-placeholder: #9C8468;
+
+  /* Scrollbar */
+  --scrollbar-track: #EEE7D9;
+  --scrollbar-thumb: #CEC5B0;
+  --scrollbar-thumb-hover: #B8AD98;
+
+  /* Code / Prompt Display */
+  --code-bg: #F0EAE0;
+  --code-border: #CEC5B0;
+
+  /* Badge */
+  --badge-bg: rgba(184, 118, 14, 0.12);
+  --badge-text: #B8760E;
+  --badge-border: rgba(184, 118, 14, 0.25);
+
+  /* Tooltip */
+  --tooltip-bg: #E6DECE;
+  --tooltip-text: #1A1510;
+  --tooltip-border: #CEC5B0;
+
+  /* Paper Texture */
+  --paper-texture: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
+}
+
+/* ── Smooth Theme Transition ─────────────────── */
+
+*,
+*::before,
+*::after {
+  transition:
+    background-color 300ms ease,
+    border-color 300ms ease,
+    color 300ms ease,
+    box-shadow 300ms ease,
+    fill 300ms ease,
+    stroke 300ms ease;
+}
+
+/* Exclude elements that shouldn't transition */
+input,
+textarea,
+button,
+.no-transition,
+.streaming-cursor,
+.dna-helix,
+.dna-strand {
+  transition:
+    background-color 300ms ease,
+    border-color 300ms ease,
+    color 300ms ease;
+}
+
+/* ── Scrollbar Styling ───────────────────────── */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* ── Score Color Utilities ───────────────────── */
+
+.score-color-low {
+  color: var(--score-low);
+}
+
+.score-color-mid {
+  color: var(--score-mid);
+}
+
+.score-color-high {
+  color: var(--score-high);
+}
+
+.score-bg-low {
+  background-color: var(--score-low);
+}
+
+.score-bg-mid {
+  background-color: var(--score-mid);
+}
+
+.score-bg-high {
+  background-color: var(--score-high);
+}
+
+/* ── Selection Colors ────────────────────────── */
+
+::selection {
+  background-color: var(--accent-amber);
+  color: var(--bg-primary);
+}
+
+::-moz-selection {
+  background-color: var(--accent-amber);
+  color: var(--bg-primary);
+}
+
+/* ── Focus Styles ────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--accent-amber);
+  outline-offset: 2px;
+}
+
+/* ── Paper Texture Overlay ───────────────────── */
+
+.paper-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--paper-texture);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.paper-texture {
+  position: relative;
+}
+
+.paper-texture > * {
+  position: relative;
+  z-index: 1;
+}

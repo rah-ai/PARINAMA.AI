@@ -1,0 +1,455 @@
+/* ════════════════════════════════════════════════
+   PARINAMA — Global Styles
+   Typography, base resets, and utility classes
+   ════════════════════════════════════════════════ */
+
+/* ── Tailwind Layers ─────────────────────────── */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Theme & Animation Imports ───────────────── */
+
+@import './themes.css';
+@import './animations.css';
+
+/* ── Google Fonts ────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
+
+/* ══════════════════════════════════════════════
+   BASE RESETS
+   ══════════════════════════════════════════════ */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+    height: 100%;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Remove default list styles */
+  ul, ol {
+    list-style: none;
+  }
+
+  /* Remove default link styles */
+  a {
+    color: var(--accent-amber);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Smooth image rendering */
+  img, svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* Better button defaults */
+  button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+  }
+
+  /* Textarea & Input defaults */
+  textarea,
+  input {
+    font-family: inherit;
+    font-size: inherit;
+    color: var(--text-primary);
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    outline: none;
+  }
+
+  textarea:focus,
+  input:focus {
+    border-color: var(--input-focus);
+  }
+
+  /* Code elements */
+  code, pre, kbd {
+    font-family: 'DM Mono', 'Fira Code', 'Cascadia Code', monospace;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   TYPOGRAPHY SYSTEM
+   ══════════════════════════════════════════════ */
+
+@layer components {
+  /* ── Headings — Playfair Display ────────────── */
+
+  .font-heading {
+    font-family: 'Playfair Display', 'Georgia', serif;
+  }
+
+  .font-body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .font-mono {
+    font-family: 'DM Mono', 'Fira Code', monospace;
+  }
+
+  /* ── Display Sizes ─────────────────────────── */
+
+  .text-display-xl {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  .text-display-lg {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  .text-display-md {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+
+  .text-display-sm {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text-primary);
+  }
+
+  /* ── Score Numbers — Large Editorial ────────── */
+
+  .text-score-xl {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .text-score-lg {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .text-score-md {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  /* ── Body Sizes ────────────────────────────── */
+
+  .text-body-lg {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 400;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+
+  .text-body {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  .text-body-sm {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  /* ── Labels & Captions ─────────────────────── */
+
+  .text-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  .text-caption {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  /* ── Mono / Code / Prompt ──────────────────── */
+
+  .text-prompt {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9375rem;
+    font-weight: 400;
+    line-height: 1.7;
+    color: var(--text-primary);
+  }
+
+  .text-prompt-sm {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  /* ── Sanskrit Text ─────────────────────────── */
+
+  .text-sanskrit {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent-amber);
+    letter-spacing: 0.02em;
+  }
+
+  /* ══════════════════════════════════════════════
+     COMPONENT CLASSES
+     ══════════════════════════════════════════════ */
+
+  /* ── Card ──────────────────────────────────── */
+
+  .card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-elevated {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 24px var(--shadow);
+  }
+
+  .card-surface {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+
+  /* ── Badge ─────────────────────────────────── */
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 4px;
+    background-color: var(--badge-bg);
+    color: var(--badge-text);
+    border: 1px solid var(--badge-border);
+    white-space: nowrap;
+  }
+
+  .badge-sm {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+
+  /* ── Button ────────────────────────────────── */
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--bg-primary);
+    background-color: var(--accent-amber);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 200ms ease;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+    filter: brightness(0.95);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    filter: none;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background-color: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 200ms ease;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent-amber);
+    color: var(--accent-amber);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 200ms ease;
+  }
+
+  .btn-ghost:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-card);
+  }
+
+  /* ── Divider ───────────────────────────────── */
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background-color: var(--border);
+    margin: 1.5rem 0;
+  }
+
+  /* ── Container ─────────────────────────────── */
+
+  .container-narrow {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .container-wide {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .container-full {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   UTILITY EXTENSIONS
+   ══════════════════════════════════════════════ */
+
+@layer utilities {
+  /* Text color utilities using CSS vars */
+  .text-primary   { color: var(--text-primary); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-muted     { color: var(--text-muted); }
+  .text-amber     { color: var(--accent-amber); }
+  .text-green     { color: var(--accent-green); }
+  .text-rose      { color: var(--accent-rose); }
+
+  /* Background utilities using CSS vars */
+  .bg-primary     { background-color: var(--bg-primary); }
+  .bg-surface     { background-color: var(--bg-surface); }
+  .bg-card        { background-color: var(--bg-card); }
+  .bg-elevated    { background-color: var(--bg-elevated); }
+
+  /* Border utility */
+  .border-theme   { border-color: var(--border); }
+
+  /* Score color utility — dynamic based on value */
+  .score-dynamic-color {
+    color: var(--score-mid);
+  }
+}
