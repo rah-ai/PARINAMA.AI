@@ -334,13 +334,14 @@ function ErrorMessage({ error }) {
 
 /* ── Main PromptInput Component ──────────────── */
 
-export default function PromptInput() {
+export default function PromptInput({ onStartEvolution }) {
   const {
-    promptConfig,
-    setPromptText,
-    setGenerationCount,
-    evolutionState,
-    setCurrentView,
+    originalPrompt,
+    setOriginalPrompt,
+    maxGenerations,
+    setMaxGenerations,
+    isEvolving,
+    setScreen,
   } = useStore();
 
   const [error, setError] = useState(null);
@@ -348,10 +349,14 @@ export default function PromptInput() {
   const textareaRef = useRef(null);
   const wsRef = useRef(null);
 
-  const { promptText, generationCount } = promptConfig;
+  const promptText = originalPrompt;
+  const setPromptText = setOriginalPrompt;
+  const generationCount = maxGenerations;
+  const setGenerationCount = setMaxGenerations;
+  const setCurrentView = setScreen;
   const charCount = promptText.length;
   const isValid = charCount >= MIN_CHARS && charCount <= MAX_CHARS;
-  const isRunning = evolutionState.isRunning;
+  const isRunning = isEvolving;
 
   /* Auto-resize textarea */
   useEffect(() => {
@@ -450,7 +455,7 @@ export default function PromptInput() {
     } catch (err) {
       setError('Failed to connect. Is the backend running?');
     }
-  }, [promptText, generationCount, charCount, setCurrentView]);
+  }, [promptText, generationCount, charCount, setCurrentView, onStartEvolution]);
 
   /* Cleanup WebSocket on unmount */
   useEffect(() => {

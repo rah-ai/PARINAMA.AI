@@ -1,0 +1,36 @@
+PARINAMA in Simple Words
+What it does: You give it a bad/mediocre prompt → it makes it better, automatically, step by step.
+
+Think of it like this:
+
+Imagine you write a rough email to your boss. PARINAMA would:
+
+Read your email and grade it (0-100) on 5 things:
+
+Is it clear?
+Is it specific enough?
+Is it actionable (does it tell what to do)?
+Is it concise (not too wordy)?
+Is it creative/engaging?
+Find the weakest part — say clarity is only 40/100
+
+Pick a fix strategy — "Let's CLARIFY this" (one of 6 strategies)
+
+Rewrite the prompt using AI to fix that weakness
+
+Grade the new version — clarity went from 40 → 72
+
+Repeat until the score is above 90 or it's tried 5-7 times
+
+Example:
+
+You type: "write about dogs"
+After evolution: "Write a 500-word engaging blog post about the top 3 health benefits of owning a dog, backed by recent studies, targeting first-time pet owners considering adoption"
+The tech behind it:
+
+Uses 3 free AI models (Groq, Gemini, Ollama) — if one fails, it switches to the next
+WebSocket streams results live — you watch the AI rewriting in real-time, character by character
+Visual dashboard shows radar charts, score graphs, and an evolution tree of how your prompt improved
+In one line: It's a prompt gym — your prompts go in weak, come out strong. 💪🧬
+
+Claude Opus 4.6 • 3x

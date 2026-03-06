@@ -53,7 +53,7 @@ function LogoMark() {
 /* ── Provider Status Dot ─────────────────────── */
 
 function ProviderStatus() {
-  const { currentProvider } = useStore();
+  const { currentLLM: currentProvider } = useStore();
   const [health, setHealth] = useState('unknown');
 
   useEffect(() => {
@@ -135,12 +135,12 @@ function ProviderStatus() {
 /* ── Session Counter ─────────────────────────── */
 
 function SessionInfo() {
-  const { currentView, evolutionState } = useStore();
+  const { currentScreen, isEvolving, currentGenerationNum, maxGenerations } = useStore();
 
-  if (currentView !== 'evolution' || !evolutionState.isRunning) return null;
+  if (currentScreen !== 'evolving' || !isEvolving) return null;
 
-  const gen = evolutionState.currentGeneration;
-  const maxGen = evolutionState.maxGenerations;
+  const gen = currentGenerationNum;
+  const maxGen = maxGenerations;
 
   return (
     <AnimatePresence>
@@ -197,7 +197,7 @@ function SessionInfo() {
 /* ── Nav Links ───────────────────────────────── */
 
 function NavLinks() {
-  const { currentView, setCurrentView, evolutionState } = useStore();
+  const { currentScreen, setScreen, isEvolving } = useStore();
 
   const links = [
     { id: 'landing', label: 'Home' },
@@ -213,13 +213,13 @@ function NavLinks() {
       }}
     >
       {links.map((link) => {
-        const isActive = currentView === link.id;
-        const isDisabled = evolutionState.isRunning && link.id !== currentView;
+        const isActive = currentScreen === link.id;
+        const isDisabled = isEvolving && link.id !== currentScreen;
 
         return (
           <motion.button
             key={link.id}
-            onClick={() => !isDisabled && setCurrentView(link.id)}
+            onClick={() => !isDisabled && setScreen(link.id)}
             whileHover={!isDisabled ? { backgroundColor: 'var(--bg-card)' } : {}}
             whileTap={!isDisabled ? { scale: 0.97 } : {}}
             style={{
