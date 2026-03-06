@@ -134,7 +134,7 @@ async def list_providers():
     provider_health = await check_provider_health()
     return {
         "providers": provider_health,
-        "fallback_chain": ["Groq (Llama 3.1 70B)", "Gemini 2.0 Flash", "Ollama (Mistral Local)"],
+        "fallback_chain": ["Groq (Llama 3.3 70B)", "Gemini 2.0 Flash", "Ollama (Mistral Local)"],
     }
 
 

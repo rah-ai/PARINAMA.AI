@@ -36,9 +36,9 @@ class LLMProvider:
 PROVIDERS = {
     "groq": LLMProvider(
         name="groq",
-        display_name="Groq (Llama 3.1 70B)",
+        display_name="Groq (Llama 3.3 70B)",
         badge_color="#F97316",
-        model="llama-3.1-70b-versatile",
+        model="llama-3.3-70b-versatile",
     ),
     "gemini": LLMProvider(
         name="gemini",
