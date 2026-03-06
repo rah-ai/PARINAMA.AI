@@ -102,6 +102,8 @@ function EvolutionView({
           alignItems: 'center',
           justifyContent: 'space-between',
           marginBottom: '1.5rem',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
         }}
       >
         <div>
@@ -166,6 +168,7 @@ function EvolutionView({
 
       {/* Two-column layout */}
       <div
+        className="evolution-grid"
         style={{
           display: 'grid',
           gridTemplateColumns: '1fr 320px',
@@ -294,6 +297,7 @@ function ResultsView({
 
       {/* Two-column: Tree + Radar */}
       <div
+        className="results-grid"
         style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',

@@ -424,6 +424,59 @@
 }
 
 /* ══════════════════════════════════════════════
+   MOBILE RESPONSIVE
+   ══════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Navbar */
+  .navbar-header {
+    padding: 0 0.75rem !important;
+    gap: 0.25rem !important;
+  }
+
+  .navbar-subtitle {
+    display: none;
+  }
+
+  /* Grids → single column */
+  .evolution-grid,
+  .results-grid,
+  .comparison-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Containers */
+  .container-narrow,
+  .container-wide,
+  .container-full {
+    padding: 0 0.75rem;
+  }
+
+  /* Cards */
+  .card,
+  .card-elevated,
+  .card-surface {
+    padding: 1rem;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-header {
+    padding: 0 0.5rem !important;
+  }
+}
+
+/* ══════════════════════════════════════════════
    UTILITY EXTENSIONS
    ══════════════════════════════════════════════ */
 

@@ -285,16 +285,19 @@ export default function Navbar({ activeView, onNavigate }) {
       initial={{ y: -60, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="navbar-header"
       style={{
         position: 'sticky',
         top: 0,
         zIndex: 100,
         width: '100%',
-        height: '56px',
+        minHeight: '56px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1.5rem',
+        gap: '0.5rem',
+        flexWrap: 'wrap',
         backgroundColor: scrolled
           ? 'var(--bg-primary)'
           : 'transparent',
@@ -310,31 +313,36 @@ export default function Navbar({ activeView, onNavigate }) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.75rem',
+          gap: '0.5rem',
+          minWidth: 0,
+          flexShrink: 0,
         }}
       >
         <LogoMark />
 
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <span
             style={{
               fontFamily: "'Playfair Display', serif",
-              fontSize: '1.125rem',
+              fontSize: '1rem',
               fontWeight: 700,
               color: 'var(--text-primary)',
               lineHeight: 1.2,
               letterSpacing: '-0.01em',
+              whiteSpace: 'nowrap',
             }}
           >
             PARINAMA
           </span>
           <span
+            className="navbar-subtitle"
             style={{
               fontFamily: "'DM Mono', monospace",
-              fontSize: '0.625rem',
+              fontSize: '0.5625rem',
               color: 'var(--text-muted)',
               lineHeight: 1,
               letterSpacing: '0.04em',
+              whiteSpace: 'nowrap',
             }}
           >
             prompt evolution engine
@@ -347,10 +355,7 @@ export default function Navbar({ activeView, onNavigate }) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '1rem',
-          position: 'absolute',
-          left: '50%',
-          transform: 'translateX(-50%)',
+          gap: '0.5rem',
         }}
       >
         <NavLinks activeView={activeView} onNavigate={onNavigate} />
@@ -362,7 +367,8 @@ export default function Navbar({ activeView, onNavigate }) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.75rem',
+          gap: '0.5rem',
+          flexShrink: 0,
         }}
       >
         <ProviderStatus />

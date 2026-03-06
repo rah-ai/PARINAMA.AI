@@ -176,6 +176,7 @@ function ScoreSummaryStrip({ originalScore, finalScore, generations, bestGenerat
         gridTemplateColumns: 'repeat(4, 1fr)',
         gap: '0.75rem',
       }}
+      className="stats-grid"
     >
       {/* Original Score */}
       <StatCard
@@ -483,6 +484,7 @@ export default function FinalPrompt({
               gridTemplateColumns: '1fr 1fr',
               gap: '0.75rem',
             }}
+            className="comparison-grid"
           >
             <PromptBlock
               prompt={originalPrompt}
