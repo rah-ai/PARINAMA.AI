@@ -187,7 +187,7 @@ export default function EvolutionTree({
   activeGeneration = null,
   bestGeneration = null,
   width = 600,
-  height = 400,
+  height = 160,
   orientation = 'horizontal', /* horizontal | vertical */
   onNodeClick = null,
   className = '',
@@ -226,7 +226,7 @@ export default function EvolutionTree({
     svg.selectAll('*').remove();
 
     const { width: w, height: h } = dimensions;
-    const margin = { top: 40, right: 60, bottom: 40, left: 60 };
+    const margin = { top: 20, right: 50, bottom: 30, left: 50 };
     const innerWidth = w - margin.left - margin.right;
     const innerHeight = h - margin.top - margin.bottom;
 
@@ -235,10 +235,23 @@ export default function EvolutionTree({
 
     /* Layout */
     const isHorizontal = orientation === 'horizontal';
+
+    /* For a linear chain (no branching), constrain vertical spread */
+    const maxDepth = root.height; /* depth of tree = number of links */
+    const isLinearChain = root.descendants().length === maxDepth + 1;
+    const effectiveHeight = isLinearChain && isHorizontal ? Math.min(innerHeight, 40) : innerHeight;
+    const effectiveWidth = isLinearChain && !isHorizontal ? Math.min(innerWidth, 40) : innerWidth;
+
     const treeLayout = d3.tree().size(
-      isHorizontal ? [innerHeight, innerWidth] : [innerWidth, innerHeight]
+      isHorizontal ? [effectiveHeight, innerWidth] : [effectiveWidth, innerHeight]
     );
     treeLayout(root);
+
+    /* If linear chain, vertically center nodes */
+    if (isLinearChain && isHorizontal) {
+      const centerY = innerHeight / 2;
+      root.descendants().forEach(d => { d.x = centerY; });
+    }
 
     /* Main group */
     const g = svg

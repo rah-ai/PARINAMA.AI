@@ -320,10 +320,9 @@ function ResultsView({
                 border: '1px solid var(--border)',
                 borderRadius: '8px',
                 padding: '1rem',
-                height: '320px',
               }}
             >
-              <EvolutionTree generations={generations} />
+              <EvolutionTree generations={generations} height={160} />
             </div>
           </motion.div>
         )}
