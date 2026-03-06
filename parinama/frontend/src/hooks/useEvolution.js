@@ -189,24 +189,66 @@ export default function useEvolution() {
           setStreamingText('');
           break;
 
-        case 'evolution_complete':
+        case 'evolution_complete': {
+          const gens = msg.generations || [];
+          const hasError = msg.error || msg.status === 'failed';
+          const hasNoData = gens.length === 0 && !msg.best_prompt;
+
+          /* If evolution failed with error and no data, show error */
+          if (hasError && hasNoData) {
+            setPhase(EvolutionPhase.ERROR);
+            setError(msg.error || 'Evolution failed — all LLM providers may be unavailable. Please check API keys.');
+            isEvolvingRef.current = false;
+            break;
+          }
+
           setPhase(EvolutionPhase.COMPLETED);
           setEvolvedPrompt(msg.best_prompt || msg.final_prompt || evolvedPrompt);
-          if (msg.final_scores) setCurrentScores(msg.final_scores);
-          setBestGeneration(msg.best_generation ?? null);
-          if (msg.generations && msg.generations.length > 0) {
-            setGenerations(msg.generations.map(g => ({
+
+          /* Extract actual generation count */
+          const actualGenCount = msg.total_generations ?? gens.length;
+          setTotalGenerations(actualGenCount);
+          if (gens.length > 0) {
+            const firstGen = gens[0];
+            const lastGen = gens[gens.length - 1];
+
+            /* Set original scores from gen 0 */
+            if (firstGen.scores && typeof firstGen.scores === 'object') {
+              const origScores = { ...emptyScores(), ...firstGen.scores };
+              delete origScores.total;
+              setOriginalScores(origScores);
+            }
+
+            /* Set final/current scores from best or last generation */
+            const bestGen = msg.best_generation;
+            const finalScoreSource = bestGen?.scores || lastGen.scores;
+            if (finalScoreSource && typeof finalScoreSource === 'object') {
+              const finalScores = { ...emptyScores(), ...finalScoreSource };
+              delete finalScores.total;
+              setCurrentScores(finalScores);
+            }
+
+            /* Map generations array */
+            setGenerations(gens.map(g => ({
               generation: g.generation_num ?? g.generation_number ?? g.generation,
               prompt: g.prompt_text ?? g.prompt ?? '',
               scores: g.scores || emptyScores(),
-              overallScore: g.score ?? g.total ?? 0,
+              overallScore: g.scores?.total ?? g.score ?? g.total ?? 0,
               mutationType: g.mutation_type || null,
               mutationReason: g.mutation_reason || null,
               provider: g.provider || g.llm_used || null,
+              weaknesses: g.weaknesses || [],
+              strengths: g.strengths || [],
+              feedback: g.feedback || {},
             })));
+          } else if (msg.final_scores) {
+            setCurrentScores(msg.final_scores);
           }
+
+          setBestGeneration(msg.best_generation ?? null);
           isEvolvingRef.current = false;
           break;
+        }
 
         case 'llm_switched':
           setCurrentProvider(msg.to_llm || null);

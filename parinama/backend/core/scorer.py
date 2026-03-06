@@ -299,30 +299,173 @@ async def score_prompt(
     llm_router_fn,
 ) -> PromptScoreResult:
     """
-    Score a prompt using the LLM router.
+    Score a prompt using the LLM router, with heuristic fallback.
 
     Args:
         prompt_text: The prompt to evaluate
         llm_router_fn: Async function that calls the LLM (from router.py)
 
     Returns:
-        PromptScoreResult with all dimension scores
+        tuple of (PromptScoreResult, llm_used, badge_color)
     """
-    scoring_prompt = build_scoring_prompt(prompt_text)
+    # Try LLM-based scoring first
+    try:
+        scoring_prompt = build_scoring_prompt(prompt_text)
 
-    # Call LLM via router
-    llm_response = await llm_router_fn(
-        prompt=scoring_prompt,
-        system=SCORING_SYSTEM_PROMPT,
-    )
+        llm_response = await llm_router_fn(
+            prompt=scoring_prompt,
+            system=SCORING_SYSTEM_PROMPT,
+        )
 
-    raw_text = llm_response["text"]
-    llm_used = llm_response.get("llm_used", "unknown")
+        raw_text = llm_response["text"]
+        llm_used = llm_response.get("llm_used", "unknown")
 
-    # Parse the response
-    result = parse_score_response(raw_text)
+        result = parse_score_response(raw_text)
+        return result, llm_used, llm_response.get("badge_color", "#888888")
 
-    return result, llm_used, llm_response.get("badge_color", "#888888")
+    except Exception as e:
+        print(f"[SCORER] LLM scoring failed, using heuristic fallback: {e}")
+        result = _heuristic_score(prompt_text)
+        return result, "Heuristic (offline)", "#9CA3AF"
+
+
+def _heuristic_score(prompt_text: str) -> PromptScoreResult:
+    """
+    Rule-based prompt scorer that works without any LLM.
+    Analyzes prompt structure, length, vocabulary, and formatting.
+    """
+    result = PromptScoreResult()
+    text = prompt_text.strip()
+    words = text.split()
+    word_count = len(words)
+    sentences = [s.strip() for s in re.split(r'[.!?]+', text) if s.strip()]
+    sentence_count = max(len(sentences), 1)
+    avg_word_len = sum(len(w) for w in words) / max(word_count, 1)
+
+    # ── CLARITY (0-100) ──
+    clarity = 50
+    # Shorter prompts tend to be clearer
+    if word_count <= 50:
+        clarity += 10
+    elif word_count > 150:
+        clarity -= 10
+    # Questions are clear
+    if '?' in text:
+        clarity += 8
+    # Numbered steps indicate structure
+    if re.search(r'\d+[\.\)]\s', text):
+        clarity += 15
+    # Bullet points
+    if re.search(r'[-•]\s', text):
+        clarity += 10
+    # Vague words reduce clarity
+    vague_words = len(re.findall(r'\b(something|stuff|things|maybe|perhaps|kind of|sort of|etc)\b', text, re.I))
+    clarity -= vague_words * 5
+    # Explicit role setting
+    if re.search(r'\b(you are|act as|role|expert|specialist)\b', text, re.I):
+        clarity += 10
+    clarity = max(15, min(95, clarity))
+
+    # ── SPECIFICITY (0-100) ──
+    specificity = 40
+    # Constraints and details
+    if word_count > 20:
+        specificity += 10
+    if word_count > 50:
+        specificity += 10
+    # Format specification
+    if re.search(r'\b(format|structure|list|table|json|markdown|bullet|paragraph|section)\b', text, re.I):
+        specificity += 12
+    # Length/quantity constraints
+    if re.search(r'\b(\d+\s*(words|sentences|paragraphs|points|items|examples|steps))\b', text, re.I):
+        specificity += 15
+    # Audience specification
+    if re.search(r'\b(audience|reader|user|beginner|expert|child|student|developer|professional)\b', text, re.I):
+        specificity += 10
+    # Examples provided
+    if re.search(r'\b(example|for instance|such as|e\.g\.|like)\b', text, re.I):
+        specificity += 8
+    specificity = max(15, min(95, specificity))
+
+    # ── ACTIONABILITY (0-100) ──
+    actionability = 45
+    # Imperative verbs (clear task)
+    action_verbs = len(re.findall(r'\b(write|create|explain|describe|list|generate|design|build|analyze|compare|summarize|suggest|provide|make|develop|implement)\b', text, re.I))
+    actionability += min(action_verbs * 8, 25)
+    # Clear deliverable mentioned
+    if re.search(r'\b(output|result|response|answer|deliverable|produce|return)\b', text, re.I):
+        actionability += 10
+    # Has constraints  
+    if re.search(r'\b(must|should|need|require|ensure|include|avoid|don\'t|do not)\b', text, re.I):
+        actionability += 10
+    actionability = max(15, min(95, actionability))
+
+    # ── CONCISENESS (0-100) ──
+    conciseness = 70
+    # Too short is bad (not enough info)
+    if word_count < 8:
+        conciseness = 40
+    elif word_count < 15:
+        conciseness = 55
+    # Sweet spot: 15-80 words
+    elif word_count <= 80:
+        conciseness = 75
+    # Getting long
+    elif word_count <= 150:
+        conciseness = 60
+    # Very verbose
+    else:
+        conciseness = 45
+    # Filler words penalty
+    fillers = len(re.findall(r'\b(just|really|very|basically|actually|literally|simply|quite|rather)\b', text, re.I))
+    conciseness -= fillers * 4
+    # Repetition penalty
+    unique_words = len(set(w.lower() for w in words))
+    repetition_ratio = unique_words / max(word_count, 1)
+    if repetition_ratio < 0.5:
+        conciseness -= 15
+    conciseness = max(15, min(95, conciseness))
+
+    # ── CREATIVITY (0-100) ──
+    creativity = 35
+    # Role-playing / persona
+    if re.search(r'\b(imagine|pretend|act as|you are|role|persona|perspective)\b', text, re.I):
+        creativity += 15
+    # Analogies or creative framing
+    if re.search(r'\b(like a|as if|analogy|metaphor|story|scenario|imagine)\b', text, re.I):
+        creativity += 12
+    # Constraints that force creativity
+    if re.search(r'\b(creative|unique|novel|innovative|original|unusual|unexpected)\b', text, re.I):
+        creativity += 10
+    # Multi-part or structured prompts
+    if re.search(r'\d+[\.\)]\s', text) or re.search(r'[-•]\s', text):
+        creativity += 8
+    # Longer, more detailed prompts tend to be more crafted
+    if word_count > 30:
+        creativity += 8
+    if word_count > 60:
+        creativity += 5
+    creativity = max(15, min(95, creativity))
+
+    # Build dimension scores
+    for dim_name, score_val, feedback in [
+        ("clarity", clarity, f"{'Clear structure' if clarity >= 60 else 'Could be more precise'} (heuristic analysis)"),
+        ("specificity", specificity, f"{'Good detail level' if specificity >= 60 else 'Needs more constraints'} (heuristic analysis)"),
+        ("actionability", actionability, f"{'Actionable and clear task' if actionability >= 60 else 'Task could be more explicit'} (heuristic analysis)"),
+        ("conciseness", conciseness, f"{'Well-balanced length' if conciseness >= 60 else 'Could be tighter'} (heuristic analysis)"),
+        ("creativity", creativity, f"{'Creative framing' if creativity >= 60 else 'Standard approach'} (heuristic analysis)"),
+    ]:
+        dim_score = DimensionScore(
+            name=dim_name,
+            score=score_val,
+            weight=DIMENSION_WEIGHTS[dim_name],
+            feedback=feedback,
+        )
+        setattr(result, dim_name, dim_score)
+
+    result.calculate_total()
+    result.identify_weaknesses(threshold=60.0)
+    return result
 
 
 # ══════════════════════════════════════════════

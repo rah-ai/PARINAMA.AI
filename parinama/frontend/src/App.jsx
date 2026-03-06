@@ -4,7 +4,7 @@
    phase-based view switching, animation orchestration
    ════════════════════════════════════════════════ */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /* ── Hooks ───────────────────────────────────── */
@@ -31,6 +31,9 @@ import EvolutionTree from './components/evolution/EvolutionTree';
 import ScoreTimeline from './components/results/ScoreTimeline';
 import FinalPrompt from './components/results/FinalPrompt';
 import ExportPanel from './components/results/ExportPanel';
+
+/* ── History ──────────────────────────────────── */
+import HistoryView from './components/history/HistoryView';
 
 /* ── Styles ──────────────────────────────────── */
 import './styles/globals.css';
@@ -233,6 +236,7 @@ function ResultsView({
   totalGenerations,
   bestGeneration,
   onReset,
+  onViewHistory,
 }) {
   return (
     <motion.div
@@ -254,9 +258,11 @@ function ResultsView({
         evolvedPrompt={evolvedPrompt}
         originalScores={originalScores}
         finalScores={currentScores}
-        generations={generations}
+        totalGenerations={totalGenerations}
+        bestGeneration={bestGeneration}
         sessionId={sessionId}
-        onEvolveAnother={onReset}
+        onStartNew={onReset}
+        onViewHistory={onViewHistory}
       />
 
       {/* Score Timeline Chart */}
@@ -455,6 +461,7 @@ function ErrorView({ error, onRetry, onReset }) {
 export default function App() {
   const { theme } = useTheme();
   const evolution = useEvolution();
+  const [showHistory, setShowHistory] = useState(false);
 
   const {
     phase,
@@ -481,12 +488,17 @@ export default function App() {
 
   /* ── Determine active view ─────────────────── */
   const activeView = useMemo(() => {
+    if (showHistory) return 'history';
     if (phase === EvolutionPhase.ERROR) return 'error';
     if (phase === EvolutionPhase.COMPLETED) return 'results';
     if (phase === EvolutionPhase.CANCELLED) return 'landing';
     if (isEvolving) return 'evolution';
     return 'landing';
-  }, [phase, isEvolving]);
+  }, [phase, isEvolving, showHistory]);
+
+  /* ── Navigate to history ───────────────────── */
+  const goToHistory = useCallback(() => setShowHistory(true), []);
+  const goHome = useCallback(() => setShowHistory(false), []);
 
   /* ── Set data-theme on root ────────────────── */
   useEffect(() => {
@@ -495,6 +507,7 @@ export default function App() {
 
   /* ── Handle start ──────────────────────────── */
   const handleStart = (prompt, maxGenerations) => {
+    setShowHistory(false);
     startEvolution(prompt, maxGenerations);
   };
 
@@ -525,6 +538,14 @@ export default function App() {
         currentGeneration={currentGeneration}
         totalGenerations={totalGenerations}
         activeView={activeView}
+        onNavigate={(view) => {
+          if (view === 'history') {
+            goToHistory();
+          } else if (view === 'landing') {
+            goHome();
+            reset();
+          }
+        }}
       />
 
       {/* Theme toggle (fixed) */}
@@ -575,7 +596,17 @@ export default function App() {
               generations={generations}
               totalGenerations={totalGenerations}
               bestGeneration={bestGeneration}
-              onReset={reset}
+              onReset={() => {
+                reset();
+                goHome();
+              }}
+              onViewHistory={goToHistory}
+            />
+          )}
+
+          {activeView === 'history' && (
+            <HistoryView
+              onStartEvolution={handleStart}
             />
           )}
 

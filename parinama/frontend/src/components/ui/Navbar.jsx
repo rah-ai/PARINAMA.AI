@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
 import useStore from '../../store/useStore';
+import { API_BASE } from '../../config';
 
 /* ── Logo Mark ───────────────────────────────── */
 
@@ -59,7 +60,7 @@ function ProviderStatus() {
   useEffect(() => {
     async function checkHealth() {
       try {
-        const res = await fetch('/api/health');
+        const res = await fetch(`${API_BASE}/health`);
         if (res.ok) {
           const data = await res.json();
           setHealth(data.status === 'healthy' ? 'healthy' : 'degraded');
@@ -196,13 +197,14 @@ function SessionInfo() {
 
 /* ── Nav Links ───────────────────────────────── */
 
-function NavLinks() {
-  const { currentScreen, setScreen, isEvolving } = useStore();
+function NavLinks({ activeView, onNavigate }) {
 
   const links = [
     { id: 'landing', label: 'Home' },
     { id: 'history', label: 'History' },
   ];
+
+  const { isEvolving } = useStore();
 
   return (
     <nav
@@ -213,13 +215,13 @@ function NavLinks() {
       }}
     >
       {links.map((link) => {
-        const isActive = currentScreen === link.id;
-        const isDisabled = isEvolving && link.id !== currentScreen;
+        const isActive = activeView === link.id;
+        const isDisabled = isEvolving && link.id !== 'landing';
 
         return (
           <motion.button
             key={link.id}
-            onClick={() => !isDisabled && setScreen(link.id)}
+            onClick={() => !isDisabled && onNavigate && onNavigate(link.id)}
             whileHover={!isDisabled ? { backgroundColor: 'var(--bg-card)' } : {}}
             whileTap={!isDisabled ? { scale: 0.97 } : {}}
             style={{
@@ -265,7 +267,7 @@ function NavLinks() {
 
 /* ── Main Navbar Component ───────────────────── */
 
-export default function Navbar() {
+export default function Navbar({ activeView, onNavigate }) {
   const [scrolled, setScrolled] = useState(false);
 
   /* Detect scroll for shadow */
@@ -351,7 +353,7 @@ export default function Navbar() {
           transform: 'translateX(-50%)',
         }}
       >
-        <NavLinks />
+        <NavLinks activeView={activeView} onNavigate={onNavigate} />
         <SessionInfo />
       </div>
 

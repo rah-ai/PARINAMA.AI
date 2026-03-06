@@ -340,7 +340,7 @@ async def mutate_prompt(
     llm_router_fn,
 ) -> MutationResult:
     """
-    Apply a mutation to the current prompt using the LLM.
+    Apply a mutation to the current prompt using the LLM, with heuristic fallback.
 
     Args:
         current_prompt: The prompt to mutate
@@ -353,39 +353,152 @@ async def mutate_prompt(
     Returns:
         MutationResult with the mutated prompt
     """
-    mutation_prompt = build_mutation_prompt(
-        current_prompt=current_prompt,
-        mutation_type=mutation_type,
-        weaknesses=weaknesses,
-        scores=scores,
-        generation_num=generation_num,
-    )
+    # Try LLM-based mutation first
+    try:
+        mutation_prompt = build_mutation_prompt(
+            current_prompt=current_prompt,
+            mutation_type=mutation_type,
+            weaknesses=weaknesses,
+            scores=scores,
+            generation_num=generation_num,
+        )
 
-    # Call LLM via router
-    llm_response = await llm_router_fn(
-        prompt=mutation_prompt,
-        system=MUTATION_SYSTEM_PROMPT,
-    )
+        llm_response = await llm_router_fn(
+            prompt=mutation_prompt,
+            system=MUTATION_SYSTEM_PROMPT,
+        )
 
-    raw_text = llm_response["text"]
-    mutated_prompt = parse_mutation_response(raw_text)
+        raw_text = llm_response["text"]
+        mutated_prompt = parse_mutation_response(raw_text)
 
-    # Build reason string
+        mutation_info = MUTATION_DESCRIPTIONS[mutation_type]
+        reason = (
+            f"Applied {mutation_type.value} mutation targeting "
+            f"{', '.join(mutation_info['targets'])}. "
+            f"Weaknesses addressed: {', '.join(weaknesses) if weaknesses else 'general improvement'}."
+        )
+
+        return MutationResult(
+            mutation_type=mutation_type,
+            original_prompt=current_prompt,
+            mutated_prompt=mutated_prompt,
+            reason=reason,
+            llm_used=llm_response.get("llm_used", "unknown"),
+            badge_color=llm_response.get("badge_color", "#888888"),
+            raw_llm_response=raw_text,
+        )
+
+    except Exception as e:
+        print(f"[MUTATOR] LLM mutation failed, using heuristic fallback: {e}")
+        return _heuristic_mutate(current_prompt, mutation_type, weaknesses)
+
+
+def _heuristic_mutate(
+    current_prompt: str,
+    mutation_type: MutationType,
+    weaknesses: list[str],
+) -> MutationResult:
+    """
+    Rule-based prompt mutation that works without an LLM.
+    Applies structural improvements based on the mutation type.
+    """
+    original = current_prompt.strip()
+    mutated = original
+
+    if mutation_type == MutationType.CLARIFY:
+        # Add structure: numbered steps, clear instructions
+        if not re.search(r'\d+[\.\)]\s', mutated):
+            # Break into clear instruction format
+            parts = [s.strip() for s in re.split(r'[.!]+', mutated) if s.strip()]
+            if len(parts) >= 2:
+                mutated = "Please complete the following task with these specific requirements:\n\n"
+                for i, part in enumerate(parts, 1):
+                    mutated += f"{i}. {part.strip().capitalize()}\n"
+                mutated += "\nBe precise and unambiguous in your response."
+            else:
+                mutated = f"Please clearly and precisely: {mutated}.\n\nProvide a well-structured, unambiguous response."
+        else:
+            mutated = f"Clearly and precisely address the following:\n\n{mutated}\n\nEnsure your response is unambiguous and well-organized."
+
+    elif mutation_type == MutationType.EXPAND:
+        # Add context, constraints, and detail
+        additions = []
+        if not re.search(r'\b(format|structure)\b', mutated, re.I):
+            additions.append("Format your response with clear sections and appropriate structure.")
+        if not re.search(r'\b(audience|reader|level)\b', mutated, re.I):
+            additions.append("Target an informed but non-specialist audience.")
+        if not re.search(r'\b(example|instance)\b', mutated, re.I):
+            additions.append("Include relevant examples to illustrate key points.")
+        if not re.search(r'\b(length|words|paragraphs)\b', mutated, re.I):
+            additions.append("Provide a comprehensive response of 200-400 words.")
+
+        if additions:
+            mutated = f"{mutated}\n\nAdditional requirements:\n" + "\n".join(f"- {a}" for a in additions)
+        else:
+            mutated = f"Provide a detailed and comprehensive response to the following:\n\n{mutated}\n\nInclude specific examples, explain your reasoning, and address potential edge cases."
+
+    elif mutation_type == MutationType.COMPRESS:
+        # Remove filler words and tighten
+        filler_patterns = [
+            (r'\b(just|really|very|basically|actually|literally|simply|quite|rather|pretty much)\b\s*', ''),
+            (r'\b(I want you to|I need you to|I would like you to|Can you please)\b\s*', ''),
+            (r'\b(please note that|it should be noted that|it is important to)\b\s*', ''),
+            (r'\b(in order to)\b', 'to'),
+            (r'\b(at this point in time)\b', 'now'),
+            (r'\b(due to the fact that)\b', 'because'),
+            (r'\b(in the event that)\b', 'if'),
+            (r'\s{2,}', ' '),
+        ]
+        for pattern, replacement in filler_patterns:
+            mutated = re.sub(pattern, replacement, mutated, flags=re.I)
+        mutated = mutated.strip()
+        if mutated and mutated[0].islower():
+            mutated = mutated[0].upper() + mutated[1:]
+
+    elif mutation_type == MutationType.REFRAME:
+        # Change perspective / approach
+        if not re.search(r'\b(you are|act as|role|expert)\b', mutated, re.I):
+            # Add expert role framing
+            mutated = f"You are an expert in this domain. A colleague asks you:\n\n\"{mutated}\"\n\nProvide your expert insight with practical, actionable advice based on your deep experience."
+        else:
+            # Reframe as step-by-step reasoning
+            mutated = f"Think through this step-by-step:\n\n{mutated}\n\nFirst, identify the core question. Then, analyze key factors. Finally, synthesize a clear, well-reasoned answer."
+
+    elif mutation_type == MutationType.SPECIALIZE:
+        # Add domain expertise and technical depth
+        if not re.search(r'\b(technical|professional|industry|domain)\b', mutated, re.I):
+            mutated = f"From a professional and technical perspective, address the following:\n\n{mutated}\n\nUse precise domain-specific terminology. Reference relevant frameworks, best practices, or established methodologies where applicable. Ensure technical accuracy."
+        else:
+            mutated = f"{mutated}\n\nApply rigorous technical standards. Reference specific methodologies, frameworks, or industry benchmarks. Use precise, domain-specific terminology throughout."
+
+    elif mutation_type == MutationType.HUMANIZE:
+        # Make more natural and engaging
+        if re.search(r'^(Write|Create|Generate|Produce|Make)\b', mutated, re.I):
+            # Rewrite as conversational request
+            task = re.sub(r'^(Write|Create|Generate|Produce|Make)\s+', '', mutated, flags=re.I)
+            mutated = f"I'm working on a project and need help with {task.lower()}\n\nI'd appreciate a response that's clear, engaging, and practical. Feel free to use a conversational tone while keeping the content substantive and useful."
+        else:
+            mutated = f"I need your help with something:\n\n{mutated}\n\nPlease keep your response natural and engaging — like you're explaining to a smart friend. Be thorough but avoid unnecessary jargon."
+
+    # Ensure the mutation actually changed something
+    if mutated.strip() == original:
+        mutated = f"Please provide a high-quality, detailed response to the following request:\n\n{original}\n\nEnsure your answer is clear, specific, actionable, concise, and well-crafted."
+
     mutation_info = MUTATION_DESCRIPTIONS[mutation_type]
     reason = (
-        f"Applied {mutation_type.value} mutation targeting "
+        f"Applied heuristic {mutation_type.value} mutation targeting "
         f"{', '.join(mutation_info['targets'])}. "
-        f"Weaknesses addressed: {', '.join(weaknesses) if weaknesses else 'general improvement'}."
+        f"Weaknesses addressed: {', '.join(weaknesses) if weaknesses else 'general improvement'} (offline mode)."
     )
 
     return MutationResult(
         mutation_type=mutation_type,
-        original_prompt=current_prompt,
-        mutated_prompt=mutated_prompt,
+        original_prompt=original,
+        mutated_prompt=mutated,
         reason=reason,
-        llm_used=llm_response.get("llm_used", "unknown"),
-        badge_color=llm_response.get("badge_color", "#888888"),
-        raw_llm_response=raw_text,
+        llm_used="Heuristic (offline)",
+        badge_color="#9CA3AF",
+        raw_llm_response="[heuristic mutation - no LLM used]",
     )
 
 
