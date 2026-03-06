@@ -24,10 +24,10 @@ export const API_BASE = `${BACKEND_URL}/api`;
 
 /* WebSocket base */
 const wsProtocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss' : 'ws';
-const backendHost = BACKEND_URL.replace(/^https?:\/\//, '');
+const wsHost = BACKEND_URL
+  ? BACKEND_URL.replace(/^https?:\/\//, '')
+  : (typeof window !== 'undefined' ? window.location.host : 'localhost:5173');
 
-export const WS_URL = isDev
-  ? `${wsProtocol}://${typeof window !== 'undefined' ? window.location.host : 'localhost:5173'}/ws/evolve`
-  : `${wsProtocol}://${backendHost}/ws/evolve`;
+export const WS_URL = `${wsProtocol}://${wsHost}/ws/evolve`;
 
 export default { API_BASE, WS_URL };
