@@ -6,6 +6,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useStore from '../../store/useStore';
+import { WS_URL } from '../../config';
 
 /* ── Constants ───────────────────────────────── */
 
@@ -389,8 +390,7 @@ export default function PromptInput({ onStartEvolution }) {
     setError(null);
 
     /* Connect WebSocket */
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws/evolve`;
+    const wsUrl = WS_URL;
 
     try {
       const ws = new WebSocket(wsUrl);

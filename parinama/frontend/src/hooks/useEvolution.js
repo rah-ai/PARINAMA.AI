@@ -5,12 +5,9 @@
    ════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { WS_URL, API_BASE } from '../config';
 
 /* ── Constants ───────────────────────────────── */
-
-const WS_BASE = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
-const WS_URL = `${WS_BASE}/ws/evolve`;
-const API_BASE = '/api';
 
 const RECONNECT_DELAY = 2000;
 const MAX_RECONNECT_ATTEMPTS = 5;
