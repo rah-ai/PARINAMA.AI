@@ -127,15 +127,30 @@ app = FastAPI(
 # ══════════════════════════════════════════════
 
 # ── CORS ──────────────────────────────────────
+_cors_origins = [
+    FRONTEND_URL,
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+]
+# Auto-detect Render frontend URL from env or add common patterns
+_render_frontend = os.getenv("RENDER_EXTERNAL_URL", "")
+if _render_frontend:
+    _cors_origins.append(_render_frontend)
+# Add known Render static site URLs
+_cors_origins.extend([
+    "https://parinama-ai-frontend.onrender.com",
+    "https://parinama-ai.onrender.com",
+    "https://parinama.onrender.com",
+])
+# Deduplicate
+_cors_origins = list(set(o for o in _cors_origins if o))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        FRONTEND_URL,
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=_cors_origins,
+    allow_origin_regex=r"https://.*\.onrender\.com",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
