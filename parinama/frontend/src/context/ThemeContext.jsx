@@ -165,4 +165,5 @@ export function useThemeContext() {
   return context;
 }
 
+export { ThemeContext };
 export default ThemeContext;
