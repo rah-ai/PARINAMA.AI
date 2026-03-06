@@ -80,17 +80,25 @@ export default function useEvolution() {
 
   const handleMessage = useCallback((event) => {
     try {
-      const msg = JSON.parse(event.data);
+      const raw = JSON.parse(event.data);
 
-      switch (msg.type) {
-        case 'connected':
+      /* Backend sends { event, data, ... } — unwrap */
+      const eventType = raw.event || raw.type;
+      const msg = raw.data || raw;
+
+      switch (eventType) {
+        case 'connection_established':
           setIsConnected(true);
           reconnectAttempts.current = 0;
           break;
 
-        case 'evolution_start':
+        case 'pong':
+          /* Heartbeat acknowledgment */
+          break;
+
+        case 'evolution_started':
           setPhase(EvolutionPhase.SCORING);
-          setSessionId(msg.session_id || null);
+          setSessionId(raw.session_id || msg.session_id || null);
           setTotalGenerations(msg.max_generations || 0);
           setCurrentGeneration(0);
           setGenerations([]);
@@ -100,88 +108,123 @@ export default function useEvolution() {
           isEvolvingRef.current = true;
           break;
 
-        case 'initial_score':
+        case 'scoring_complete':
           setPhase(EvolutionPhase.MUTATING);
-          setOriginalScores(msg.scores || emptyScores());
+          setOriginalScores((prev) => {
+            /* Only set original scores on gen 0 */
+            if (msg.generation_num === 0 || msg.generation_num === 1) {
+              return msg.scores || emptyScores();
+            }
+            return prev;
+          });
           setCurrentScores(msg.scores || emptyScores());
-          setGenerations((prev) => [
-            ...prev,
-            {
-              generation: 0,
-              prompt: originalPrompt,
+          setCurrentProvider(msg.llm_used || null);
+          setGenerations((prev) => {
+            const existingIdx = prev.findIndex(g => g.generation === msg.generation_num);
+            const genData = {
+              generation: msg.generation_num,
+              prompt: prev[existingIdx]?.prompt || originalPrompt,
               scores: msg.scores || emptyScores(),
-              overallScore: msg.overall_score ?? 0,
-              mutationType: null,
-              mutationReason: null,
-              provider: msg.provider || null,
-            },
-          ]);
-          break;
-
-        case 'generation_start':
-          setPhase(EvolutionPhase.EVOLVING);
-          setCurrentGeneration(msg.generation || 0);
-          setStreamingText('');
-          setCurrentMutation({
-            type: msg.mutation_type || null,
-            reason: msg.mutation_reason || null,
+              overallScore: msg.total ?? 0,
+              mutationType: prev[existingIdx]?.mutationType || null,
+              mutationReason: prev[existingIdx]?.mutationReason || null,
+              provider: msg.llm_used || null,
+              weaknesses: msg.weaknesses || [],
+              strengths: msg.strengths || [],
+            };
+            if (existingIdx >= 0) {
+              const updated = [...prev];
+              updated[existingIdx] = { ...updated[existingIdx], ...genData };
+              return updated;
+            }
+            return [...prev, genData];
           });
           break;
 
-        case 'token':
-          setPhase(EvolutionPhase.STREAMING);
-          setStreamingText((prev) => prev + (msg.content || ''));
+        case 'generation_begin':
+          setPhase(EvolutionPhase.EVOLVING);
+          setCurrentGeneration(msg.generation_num || 0);
+          setStreamingText('');
+          setCurrentMutation(null);
           break;
 
-        case 'generation_complete':
+        case 'mutation_selected':
+          setCurrentMutation({
+            type: msg.mutation_type || null,
+            reason: msg.reason || null,
+            label: msg.mutation_label || null,
+            description: msg.mutation_description || null,
+          });
+          break;
+
+        case 'new_prompt_chunk':
+          setPhase(EvolutionPhase.STREAMING);
+          setStreamingText((prev) => prev + (msg.chunk || ''));
+          break;
+
+        case 'new_prompt_complete':
           setPhase(EvolutionPhase.MUTATING);
           setCurrentScores(msg.scores || emptyScores());
-          setCurrentProvider(msg.provider || null);
-          setGenerations((prev) => [
-            ...prev,
-            {
-              generation: msg.generation || prev.length,
-              prompt: msg.evolved_prompt || streamingText,
-              scores: msg.scores || emptyScores(),
-              overallScore: msg.overall_score ?? 0,
+          setCurrentProvider(msg.llm_used || null);
+          setEvolvedPrompt(msg.new_prompt || '');
+          setGenerations((prev) => {
+            const existingIdx = prev.findIndex(g => g.generation === msg.generation_num);
+            const genData = {
+              generation: msg.generation_num || prev.length,
+              prompt: msg.new_prompt || streamingText,
+              scores: prev[existingIdx]?.scores || emptyScores(),
+              overallScore: msg.total_score ?? msg.best_score ?? 0,
               mutationType: msg.mutation_type || currentMutation?.type || null,
-              mutationReason: msg.mutation_reason || currentMutation?.reason || null,
-              provider: msg.provider || null,
-            },
-          ]);
-          setEvolvedPrompt(msg.evolved_prompt || streamingText);
+              mutationReason: currentMutation?.reason || null,
+              provider: msg.llm_used || null,
+              improvement: msg.improvement || 0,
+            };
+            if (existingIdx >= 0) {
+              const updated = [...prev];
+              updated[existingIdx] = { ...updated[existingIdx], ...genData };
+              return updated;
+            }
+            return [...prev, genData];
+          });
           setStreamingText('');
           break;
 
         case 'evolution_complete':
           setPhase(EvolutionPhase.COMPLETED);
-          setEvolvedPrompt(msg.final_prompt || evolvedPrompt);
-          setCurrentScores(msg.final_scores || currentScores);
+          setEvolvedPrompt(msg.best_prompt || msg.final_prompt || evolvedPrompt);
+          if (msg.final_scores) setCurrentScores(msg.final_scores);
           setBestGeneration(msg.best_generation ?? null);
+          if (msg.generations && msg.generations.length > 0) {
+            setGenerations(msg.generations.map(g => ({
+              generation: g.generation_num ?? g.generation_number ?? g.generation,
+              prompt: g.prompt_text ?? g.prompt ?? '',
+              scores: g.scores || emptyScores(),
+              overallScore: g.score ?? g.total ?? 0,
+              mutationType: g.mutation_type || null,
+              mutationReason: g.mutation_reason || null,
+              provider: g.provider || g.llm_used || null,
+            })));
+          }
           isEvolvingRef.current = false;
           break;
 
-        case 'llm_switch':
-          setCurrentProvider(msg.to_provider || null);
+        case 'llm_switched':
+          setCurrentProvider(msg.to_llm || null);
           break;
 
-        case 'error':
+        case 'evolution_error':
           setPhase(EvolutionPhase.ERROR);
           setError(msg.message || 'Unknown error occurred');
           isEvolvingRef.current = false;
           break;
 
-        case 'cancelled':
+        case 'evolution_cancelled':
           setPhase(EvolutionPhase.CANCELLED);
           isEvolvingRef.current = false;
           break;
 
-        case 'pong':
-          /* Heartbeat acknowledgment */
-          break;
-
         default:
-          console.warn('[useEvolution] Unknown message type:', msg.type);
+          console.warn('[useEvolution] Unknown event type:', eventType, raw);
       }
     } catch (err) {
       console.error('[useEvolution] Message parse error:', err);
@@ -209,7 +252,7 @@ export default function useEvolution() {
         /* Start heartbeat */
         heartbeatRef.current = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: 'ping' }));
+            ws.send(JSON.stringify({ action: 'ping' }));
           }
         }, HEARTBEAT_INTERVAL);
       };
@@ -276,7 +319,7 @@ export default function useEvolution() {
     const send = () => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         wsRef.current.send(JSON.stringify({
-          type: 'evolve',
+          action: 'start_evolution',
           prompt: prompt.trim(),
           max_generations: maxGenerations,
         }));
@@ -296,7 +339,7 @@ export default function useEvolution() {
 
         heartbeatRef.current = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: 'ping' }));
+            ws.send(JSON.stringify({ action: 'ping' }));
           }
         }, HEARTBEAT_INTERVAL);
 
@@ -326,7 +369,7 @@ export default function useEvolution() {
 
   const cancelEvolution = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: 'cancel' }));
+      wsRef.current.send(JSON.stringify({ action: 'cancel_evolution' }));
     }
     isEvolvingRef.current = false;
     setPhase(EvolutionPhase.CANCELLED);

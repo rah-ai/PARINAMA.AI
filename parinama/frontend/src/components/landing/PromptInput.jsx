@@ -6,7 +6,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useStore from '../../store/useStore';
-import { WS_URL } from '../../config';
 
 /* ── Constants ───────────────────────────────── */
 
@@ -348,13 +347,11 @@ export default function PromptInput({ onStartEvolution }) {
   const [error, setError] = useState(null);
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef(null);
-  const wsRef = useRef(null);
 
   const promptText = originalPrompt;
   const setPromptText = setOriginalPrompt;
   const generationCount = maxGenerations;
   const setGenerationCount = setMaxGenerations;
-  const setCurrentView = setScreen;
   const charCount = promptText.length;
   const isValid = charCount >= MIN_CHARS && charCount <= MAX_CHARS;
   const isRunning = isEvolving;
@@ -376,7 +373,7 @@ export default function PromptInput({ onStartEvolution }) {
   }, [setPromptText]);
 
   /* Validate and submit */
-  const handleEvolve = useCallback(async () => {
+  const handleEvolve = useCallback(() => {
     /* Validation */
     if (charCount < MIN_CHARS) {
       setError(`Prompt must be at least ${MIN_CHARS} characters (currently ${charCount})`);
@@ -389,83 +386,11 @@ export default function PromptInput({ onStartEvolution }) {
 
     setError(null);
 
-    /* Connect WebSocket */
-    const wsUrl = WS_URL;
-
-    try {
-      const ws = new WebSocket(wsUrl);
-      wsRef.current = ws;
-
-      ws.onopen = () => {
-        ws.send(JSON.stringify({
-          action: 'start_evolution',
-          prompt: promptText.trim(),
-          max_generations: generationCount,
-        }));
-        setCurrentView('evolution');
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          const store = useStore.getState();
-
-          switch (data.type) {
-            case 'evolution_started':
-              store.handleEvolutionStarted(data);
-              break;
-            case 'scoring_complete':
-              store.handleScoringComplete(data);
-              break;
-            case 'mutation_selected':
-              store.handleMutationSelected(data);
-              break;
-            case 'new_prompt_chunk':
-              store.handleNewPromptChunk(data);
-              break;
-            case 'new_prompt_complete':
-              store.handleNewPromptComplete(data);
-              break;
-            case 'llm_switched':
-              store.handleLLMSwitched(data);
-              break;
-            case 'evolution_complete':
-              store.handleEvolutionComplete(data);
-              ws.close();
-              break;
-            case 'evolution_error':
-              store.handleEvolutionError(data);
-              ws.close();
-              break;
-            default:
-              break;
-          }
-        } catch {
-          /* Ignore malformed messages */
-        }
-      };
-
-      ws.onerror = () => {
-        setError('Connection error. Please check that the server is running.');
-      };
-
-      ws.onclose = () => {
-        wsRef.current = null;
-      };
-    } catch (err) {
-      setError('Failed to connect. Is the backend running?');
+    /* Delegate to App.jsx via the onStartEvolution prop */
+    if (onStartEvolution) {
+      onStartEvolution(promptText.trim(), generationCount);
     }
-  }, [promptText, generationCount, charCount, setCurrentView, onStartEvolution]);
-
-  /* Cleanup WebSocket on unmount */
-  useEffect(() => {
-    return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-        wsRef.current = null;
-      }
-    };
-  }, []);
+  }, [promptText, generationCount, charCount, onStartEvolution]);
 
   /* Keyboard shortcut: Ctrl/Cmd + Enter to evolve */
   const handleKeyDown = useCallback((e) => {
