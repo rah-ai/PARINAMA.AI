@@ -116,6 +116,63 @@ export default function AboutView() {
         </div>
       </div>
 
+      {/* Contact */}
+      <div
+        style={{
+          marginTop: '1.5rem',
+          padding: '1.5rem',
+          borderRadius: '8px',
+          border: '1px solid var(--border)',
+          backgroundColor: 'var(--bg-card)',
+        }}
+      >
+        <p
+          style={{
+            fontFamily: "'DM Mono', monospace",
+            fontSize: '0.75rem',
+            color: 'var(--text-muted)',
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            marginBottom: '0.75rem',
+          }}
+        >
+          Get in touch
+        </p>
+        <p
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontSize: '0.875rem',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.6,
+            margin: '0 0 0.75rem',
+          }}
+        >
+          Have feedback, ideas, or want to collaborate? We'd love to hear from you.
+        </p>
+        <a
+          href="mailto:parinama.ai@gmail.com"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.5rem 1rem',
+            borderRadius: '6px',
+            border: '1px solid var(--border)',
+            backgroundColor: 'var(--bg-surface)',
+            fontFamily: "'DM Mono', monospace",
+            fontSize: '0.8125rem',
+            color: 'var(--accent-amber)',
+            textDecoration: 'none',
+            fontWeight: 500,
+            transition: 'background-color 150ms ease',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-card)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-surface)'}
+        >
+          ✉ parinama.ai@gmail.com
+        </a>
+      </div>
+
       {/* Tech stack */}
       <div
         style={{

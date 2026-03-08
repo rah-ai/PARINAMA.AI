@@ -589,6 +589,48 @@ function Footer({ goToHistory, goToAbout, goHome }) {
           </ul>
         </div>
 
+        {/* Contact column */}
+        <div style={{ minWidth: '140px' }}>
+          <p
+            style={{
+              fontFamily: "'DM Mono', monospace",
+              fontSize: '0.6875rem',
+              color: 'var(--text-muted)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              marginBottom: '0.625rem',
+              marginTop: 0,
+            }}
+          >
+            Contact
+          </p>
+          <a
+            href="mailto:parinama.ai@gmail.com"
+            style={{
+              fontFamily: "'DM Mono', monospace",
+              fontSize: '0.75rem',
+              color: 'var(--text-secondary)',
+              textDecoration: 'none',
+              transition: 'color 150ms ease',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent-amber)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
+          >
+            ✉ parinama.ai@gmail.com
+          </a>
+          <p
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: '0.6875rem',
+              color: 'var(--text-muted)',
+              margin: '0.375rem 0 0',
+              lineHeight: 1.5,
+            }}
+          >
+            Feedback &amp; queries welcome
+          </p>
+        </div>
+
         {/* Rotating quote column */}
         <div style={{ minWidth: '200px', maxWidth: '280px' }}>
           <p
