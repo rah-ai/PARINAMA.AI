@@ -113,16 +113,6 @@ export default function AboutView() {
           >
             Made by Rahul Makwana
           </p>
-          <p
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: '0.75rem',
-              color: 'var(--text-muted)',
-              margin: '0.25rem 0 0',
-            }}
-          >
-            Rahul Career College Professional
-          </p>
         </div>
       </div>
 
@@ -155,7 +145,7 @@ export default function AboutView() {
             gap: '0.5rem',
           }}
         >
-          {['FastAPI', 'React', 'Groq', 'Gemini', 'D3.js', 'Framer Motion'].map(
+          {['Python', 'FastAPI', 'React', 'Groq', 'Gemini', 'D3.js', 'Framer Motion'].map(
             (tech) => (
               <span
                 key={tech}
