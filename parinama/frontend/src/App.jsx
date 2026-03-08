@@ -35,6 +35,9 @@ import ExportPanel from './components/results/ExportPanel';
 /* ── History ──────────────────────────────────── */
 import HistoryView from './components/history/HistoryView';
 
+/* ── About ────────────────────────────────────── */
+import AboutView from './components/about/AboutView';
+
 /* ── Styles ──────────────────────────────────── */
 import './styles/globals.css';
 import './styles/themes.css';
@@ -465,6 +468,7 @@ export default function App() {
   const { theme } = useTheme();
   const evolution = useEvolution();
   const [showHistory, setShowHistory] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   const {
     phase,
@@ -491,17 +495,19 @@ export default function App() {
 
   /* ── Determine active view ─────────────────── */
   const activeView = useMemo(() => {
+    if (showAbout) return 'about';
     if (showHistory) return 'history';
     if (phase === EvolutionPhase.ERROR) return 'error';
     if (phase === EvolutionPhase.COMPLETED) return 'results';
     if (phase === EvolutionPhase.CANCELLED) return 'landing';
     if (isEvolving) return 'evolution';
     return 'landing';
-  }, [phase, isEvolving, showHistory]);
+  }, [phase, isEvolving, showHistory, showAbout]);
 
   /* ── Navigate to history ───────────────────── */
-  const goToHistory = useCallback(() => setShowHistory(true), []);
-  const goHome = useCallback(() => setShowHistory(false), []);
+  const goToHistory = useCallback(() => { setShowAbout(false); setShowHistory(true); }, []);
+  const goHome = useCallback(() => { setShowHistory(false); setShowAbout(false); }, []);
+  const goToAbout = useCallback(() => { setShowHistory(false); setShowAbout(true); }, []);
 
   /* ── Set data-theme on root ────────────────── */
   useEffect(() => {
@@ -511,6 +517,7 @@ export default function App() {
   /* ── Handle start ──────────────────────────── */
   const handleStart = (prompt, maxGenerations) => {
     setShowHistory(false);
+    setShowAbout(false);
     startEvolution(prompt, maxGenerations);
   };
 
@@ -544,6 +551,8 @@ export default function App() {
         onNavigate={(view) => {
           if (view === 'history') {
             goToHistory();
+          } else if (view === 'about') {
+            goToAbout();
           } else if (view === 'landing') {
             goHome();
             reset();
@@ -611,6 +620,10 @@ export default function App() {
             <HistoryView
               onStartEvolution={handleStart}
             />
+          )}
+
+          {activeView === 'about' && (
+            <AboutView />
           )}
 
           {activeView === 'error' && (

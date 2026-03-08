@@ -224,11 +224,6 @@ class EvolutionEngine:
             if self._cancelled:
                 return self._finalize(start_time)
 
-            # Check if original already exceeds threshold
-            if self.state.best_score >= self.score_threshold:
-                self.state.is_complete = True
-                return self._finalize(start_time)
-
             # ══════════════════════════════════
             # GENERATIONS 1 to N — Evolve
             # ══════════════════════════════════
@@ -252,11 +247,6 @@ class EvolutionEngine:
                 latest = self.state.generations[-1]
                 if latest.mutation_type:
                     previous_mutations.append(latest.mutation_type.value)
-
-                # Check if we've exceeded the threshold
-                if self.state.best_score >= self.score_threshold:
-                    self.state.is_complete = True
-                    break
 
             self.state.is_complete = True
 

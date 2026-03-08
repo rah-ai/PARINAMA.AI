@@ -202,6 +202,7 @@ function NavLinks({ activeView, onNavigate }) {
   const links = [
     { id: 'landing', label: 'Home' },
     { id: 'history', label: 'History' },
+    { id: 'about', label: 'About' },
   ];
 
   const { isEvolving } = useStore();
