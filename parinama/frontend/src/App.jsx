@@ -535,6 +535,8 @@ export default function App() {
       className="app-root"
       style={{
         minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
         backgroundColor: 'var(--bg)',
         color: 'var(--text-primary)',
         transition: 'background-color 300ms ease, color 300ms ease',
@@ -573,7 +575,7 @@ export default function App() {
       </div>
 
       {/* Main content — phase-switched views */}
-      <main style={{ paddingTop: '4rem' }}>
+      <main style={{ paddingTop: '4rem', flex: 1 }}>
         <AnimatePresence mode="wait">
           {activeView === 'landing' && (
             <LandingView
@@ -635,6 +637,44 @@ export default function App() {
           )}
         </AnimatePresence>
       </main>
+
+      {/* Footer */}
+      <footer
+        style={{
+          width: '100%',
+          padding: '1.5rem 1.5rem',
+          borderTop: '1px solid var(--border)',
+          backgroundColor: 'var(--bg-primary)',
+          textAlign: 'center',
+          marginTop: 'auto',
+        }}
+      >
+        <p
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontSize: '0.8125rem',
+            color: 'var(--text-muted)',
+            margin: 0,
+            lineHeight: 1.6,
+          }}
+        >
+          Made with ♥ by{' '}
+          <span style={{ color: 'var(--accent-amber)', fontWeight: 600 }}>
+            Rahul Makwana
+          </span>
+        </p>
+        <p
+          style={{
+            fontFamily: "'DM Mono', monospace",
+            fontSize: '0.6875rem',
+            color: 'var(--text-muted)',
+            margin: '0.25rem 0 0',
+            opacity: 0.7,
+          }}
+        >
+          PARINAMA — Self-Evolving Prompt Optimization Engine
+        </p>
+      </footer>
 
       {/* Film grain overlay */}
       <div
