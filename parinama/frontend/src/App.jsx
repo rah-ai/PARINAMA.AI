@@ -642,38 +642,188 @@ export default function App() {
       <footer
         style={{
           width: '100%',
-          padding: '1.5rem 1.5rem',
+          padding: '2.5rem 2rem 2rem',
           borderTop: '1px solid var(--border)',
           backgroundColor: 'var(--bg-primary)',
-          textAlign: 'center',
           marginTop: 'auto',
         }}
       >
-        <p
+        <div
           style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: '0.8125rem',
-            color: 'var(--text-muted)',
-            margin: 0,
-            lineHeight: 1.6,
+            maxWidth: '960px',
+            margin: '0 auto',
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            gap: '2rem',
           }}
         >
-          Made with ♥ by{' '}
-          <span style={{ color: 'var(--accent-amber)', fontWeight: 600 }}>
-            Rahul Makwana
-          </span>
-        </p>
-        <p
+          {/* Brand column */}
+          <div style={{ minWidth: '200px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <span
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  color: 'var(--text-primary)',
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                PARINAMA
+              </span>
+              <span
+                style={{
+                  fontSize: '0.625rem',
+                  fontFamily: "'DM Mono', monospace",
+                  padding: '0.125rem 0.375rem',
+                  borderRadius: '3px',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-muted)',
+                  lineHeight: 1,
+                }}
+              >
+                beta
+              </span>
+            </div>
+            <p
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '0.75rem',
+                color: 'var(--text-muted)',
+                lineHeight: 1.6,
+                margin: 0,
+                maxWidth: '260px',
+              }}
+            >
+              Self-evolving prompt optimization engine.
+              Powered by evolutionary algorithms &amp; LLMs.
+            </p>
+          </div>
+
+          {/* Product column */}
+          <div style={{ minWidth: '120px' }}>
+            <p
+              style={{
+                fontFamily: "'DM Mono', monospace",
+                fontSize: '0.6875rem',
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                marginBottom: '0.625rem',
+                marginTop: 0,
+              }}
+            >
+              Product
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+              {[
+                { label: 'Home', view: 'landing' },
+                { label: 'History', view: 'history' },
+                { label: 'About', view: 'about' },
+              ].map((item) => (
+                <li key={item.view}>
+                  <button
+                    onClick={() => {
+                      if (item.view === 'history') goToHistory();
+                      else if (item.view === 'about') goToAbout();
+                      else { goHome(); reset(); }
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: '0.8125rem',
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      transition: 'color 150ms ease',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent-amber)'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+                  >
+                    {item.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Tech column */}
+          <div style={{ minWidth: '120px' }}>
+            <p
+              style={{
+                fontFamily: "'DM Mono', monospace",
+                fontSize: '0.6875rem',
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                marginBottom: '0.625rem',
+                marginTop: 0,
+              }}
+            >
+              Stack
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
+              {['FastAPI', 'React', 'Groq', 'Gemini', 'D3.js'].map((t) => (
+                <span
+                  key={t}
+                  style={{
+                    padding: '0.1875rem 0.5rem',
+                    borderRadius: '3px',
+                    border: '1px solid var(--border)',
+                    fontFamily: "'DM Mono', monospace",
+                    fontSize: '0.6875rem',
+                    color: 'var(--text-muted)',
+                  }}
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div
           style={{
-            fontFamily: "'DM Mono', monospace",
-            fontSize: '0.6875rem',
-            color: 'var(--text-muted)',
-            margin: '0.25rem 0 0',
-            opacity: 0.7,
+            maxWidth: '960px',
+            margin: '1.75rem auto 0',
+            paddingTop: '1.25rem',
+            borderTop: '1px solid var(--border)',
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '0.5rem',
           }}
         >
-          PARINAMA — Self-Evolving Prompt Optimization Engine
-        </p>
+          <p
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: '0.75rem',
+              color: 'var(--text-muted)',
+              margin: 0,
+            }}
+          >
+            &copy; {new Date().getFullYear()} PARINAMA &middot; Built by{' '}
+            <span style={{ color: 'var(--accent-amber)', fontWeight: 600 }}>
+              Rahul Makwana
+            </span>
+          </p>
+          <p
+            style={{
+              fontFamily: "'DM Mono', monospace",
+              fontSize: '0.6875rem',
+              color: 'var(--text-muted)',
+              margin: 0,
+              opacity: 0.6,
+            }}
+          >
+            v1.0.0
+          </p>
+        </div>
       </footer>
 
       {/* Film grain overlay */}
