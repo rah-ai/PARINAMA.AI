@@ -92,6 +92,7 @@ function ProviderStatus() {
 
   return (
     <motion.div
+      className="provider-status"
       initial={{ opacity: 0, x: 10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.3 }}
@@ -298,7 +299,6 @@ export default function Navbar({ activeView, onNavigate }) {
         justifyContent: 'space-between',
         padding: '0 1.5rem',
         gap: '0.5rem',
-        flexWrap: 'wrap',
         backgroundColor: scrolled
           ? 'var(--bg-primary)'
           : 'transparent',

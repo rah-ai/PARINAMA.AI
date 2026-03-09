@@ -438,6 +438,10 @@
     display: none;
   }
 
+  .provider-status {
+    display: none !important;
+  }
+
   /* Grids → single column */
   .evolution-grid,
   .results-grid,
