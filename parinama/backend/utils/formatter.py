@@ -64,13 +64,21 @@ def format_evolution_summary(result: dict) -> dict:
     """Format an evolution result for a summary display."""
     return {
         "session_id": result.get("session_id", ""),
+        "original_prompt": result.get("original_prompt", ""),
+        "best_prompt": result.get("best_prompt", ""),
+        "best_score": result.get("best_score", 0) or 0,
+        "initial_score": result.get("initial_score", 0) or 0,
+        "improvement": result.get("score_improvement", 0) or result.get("improvement", 0) or 0,
+        "total_generations": result.get("total_generations", 0),
+        "status": result.get("status", "unknown"),
+        "primary_llm_used": result.get("primary_llm_used", ""),
+        "created_at": result.get("created_at"),
+        "completed_at": result.get("completed_at"),
         "original_preview": format_prompt_preview(result.get("original_prompt", "")),
         "best_preview": format_prompt_preview(result.get("best_prompt", "")),
-        "score": format_score(result.get("best_score", 0)),
-        "improvement": format_improvement(result.get("improvement", 0)),
-        "generations": result.get("total_generations", 0),
-        "time": format_time_ms(result.get("total_time_ms", 0)),
-        "status": result.get("status", "unknown"),
+        "score_display": format_score(result.get("best_score", 0) or 0),
+        "improvement_display": format_improvement(result.get("score_improvement", 0) or result.get("improvement", 0) or 0),
+        "time_display": format_time_ms(result.get("total_time_ms", 0)),
     }
 
 
